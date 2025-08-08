@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Attendance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 12px 20px;
+            margin: 4px 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        .main-content {
+            margin-left: 260px;
+            padding: 20px;
+        }
+        .leave-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        .balance-card {
+            background: linear-gradient(45deg, #3498db, #2c3e50);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        .balance-card:hover {
+            transform: translateY(-5px);
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .status-pending { background: #ffeeba; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+        .status-maternity { background: #e1bee7; color: #6a1b9a; }
+        .table-custom {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        .table-custom th {
+            background: #f8f9fa;
+            border: none;
+        }
+        .user-info {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="text-center mb-4">
+            <img id="userImage" src="./assets/default-avatar.jpg" alt="User" 
+                 class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
+            <h5 id="userName" class="mb-0">Loading...</h5>
+            <small id="userDepartment" class="text-light">Loading...</small>
+        </div>
+
+        <a href="dashboard_emp.html"><i class="fas fa-home me-2"></i> Dashboard</a>
+        <a href="chellam.html"><i class="fas fa-user me-2"></i> Personal Info</a>
+        <a href="employee_info.html"><i class="fas fa-briefcase me-2"></i> Employment Info</a>
+        <a href="emp_performance.html"><i class="fas fa-chart-line me-2"></i> Performance</a>
+        <a href="view_attendance.html" class="active"><i class="fas fa-calendar-check me-2"></i> Attendance</a>
+        <a href="leave_form.html"><i class="fas fa-plus-circle me-2"></i> Submit Leave</a>
+        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+    </div>
+
+    <div class="main-content">
+        <div class="user-info">
+            <img id="userAvatar" src="./assets/default-avatar.jpg" alt="User" class="user-avatar">
+            <div>
+                <h4 id="welcomeUser">Welcome, User</h4>
+                <p id="userRole" class="text-muted mb-0">Employee</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="balance-card">
+                    <h5><i class="fas fa-calendar-alt me-2"></i>PTO Balance</h5>
+                    <h2 id="ptoBalance">35</h2>
+                    <small>Sick Leave, Casual Leave, Paid Leave</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="balance-card">
+                    <h5><i class="fas fa-clock me-2"></i>Flexible Leave Balance</h5>
+                    <h2 id="flexBalance">10</h2>
+                    <small>Flexible Leaves</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="balance-card">
+                    <h5><i class="fas fa-baby me-2"></i>Maternity Leave</h5>
+                    <h2 id="maternityStatus">Available</h2>
+                    <small>4 months when approved</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="leave-card mt-4">
+            <h3><i class="fas fa-history me-2"></i>Leave History</h3>
+            <div class="table-responsive mt-4">
+                <table class="table table-hover table-custom">
+                    <thead>
+                        <tr>
+                            <th>Leave Type</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                            <th>Applied On</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaveHistory">
+                        <tr>
+                            <td colspan="6" class="text-center">Loading leave history...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const userData = JSON.parse(localStorage.getItem('userData'));
+                if (!userData || !userData.user_id) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Update user information
+                document.getElementById('userName').textContent = userData.f_name || 'User';
+                document.getElementById('welcomeUser').textContent = `Welcome, ${userData.f_name || 'User'}`;
+                document.getElementById('userDepartment').textContent = userData.department || 'Department';
+                document.getElementById('userRole').textContent = userData.position || 'Employee';
+
+                // Fetch leave history
+                const response = await fetch(`/api/leaves/${userData.user_id}`);
+                if (!response.ok) throw new Error('Failed to fetch leave history');
+                const leaveData = await response.json();
+
+                let ptoBalance = 35;
+                let flexBalance = 10;
+                let maternityUsed = false;
+
+                const leaveHistory = document.getElementById('leaveHistory');
+                leaveHistory.innerHTML = leaveData.map(leave => {
+                    const start = new Date(leave.starting_date);
+                    const end = new Date(leave.ending_date);
+                    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+                    let statusClass = 'status-pending';
+                    let statusText = leave.status || 'Pending';
+
+                    if (leave.status === 'Accepted') {
+                        if (leave.leave_type === 'Maternity Leave') {
+                            maternityUsed = true;
+                            statusClass = 'status-maternity';
+                            statusText = 'Maternity Leave Over';
+                        } else {
+                            statusClass = 'status-approved';
+                            if (leave.leave_type === 'Flexible Leave') {
+                                flexBalance -= days;
+                            } else if (['Sick Leave', 'Casual Leave', 'Paid Leave'].includes(leave.leave_type)) {
+                                ptoBalance -= days;
+                            }
+                        }
+                    } else if (leave.status === 'Rejected') {
+                        statusClass = 'status-rejected';
+                    }
+
+                    return `
+                        <tr>
+                            <td>${leave.leave_type}</td>
+                            <td>${start.toLocaleDateString()}</td>
+                            <td>${end.toLocaleDateString()}</td>
+                            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                            <td>${new Date(leave.applied_date).toLocaleDateString()}</td>
+                            <td>${days} day${days > 1 ? 's' : ''}</td>
+                        </tr>
+                    `;
+                }).join('') || '<tr><td colspan="6" class="text-center">No leave history found</td></tr>';
+
+                // Update balance displays
+                document.getElementById('ptoBalance').textContent = Math.max(0, ptoBalance);
+                document.getElementById('flexBalance').textContent = Math.max(0, flexBalance);
+                document.getElementById('maternityStatus').textContent = 
+                    maternityUsed ? 'Used' : 'Available';
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('leaveHistory').innerHTML = 
+                    '<tr><td colspan="6" class="text-center text-danger">Error loading leave history</td></tr>';
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('userData');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

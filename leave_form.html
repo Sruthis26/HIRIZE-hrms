@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Request Form</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e9e4e6, #f1f2f2);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 250px;
+            background: #343a40;
+            color: rgb(244, 234, 234);
+            position: fixed;
+            height: 100%;
+            padding-top: 20px;
+            padding-left: 15px;
+        }
+
+        .sidebar a, .sidebar .dropdown-toggle {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover, .sidebar .dropdown-toggle:hover {
+            background: #495057;
+        }
+
+        .dropdown-menu {
+            background: #495057;
+            border: none;
+        }
+
+        .dropdown-menu .dropdown-item {
+            color: white;
+        }
+
+        .dropdown-menu .dropdown-item:hover {
+            background: #6c757d;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 270px;
+            width: 100%;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h2 {
+            text-align: center;
+            color: #07021d;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background-color: #2e7a8d;
+            border: none;
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #809539;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h4 class="text-center">Dashboard</h4>
+        <a href="dashboard_emp.html">Home</a>
+ <br>
+        <a href="chellam.html">Personal Info</a>
+<br>
+        <a href="employee_info.html">Employment Info</a>
+<br>
+        <a href="payroll.html">Payroll</a>
+        <br>
+        <div class="dropdown">
+            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">Attendance</a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="mark_attendance.html">Mark Attendance</a></li>
+                <li><a class="dropdown-item" href="leave_form.html">Submit LeaveRequest</a></li>
+            </ul>
+        </div>
+        <br>
+        <a href="#">Training</a>
+        <br>
+        <a href="logout.html">Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <h2>Leave Request Form</h2>
+            <form id="leaveForm">
+                <div class="mb-3">
+                    <label for="user_id" class="form-label">User ID</label>
+                    <input type="text" class="form-control" id="user_id" required>
+                </div>
+                <div class="mb-3">
+                    <label for="full_name" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="full_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="department" class="form-label">Department</label>
+                    <input type="text" class="form-control" id="department" required>
+                </div>
+                <div class="mb-3">
+                    <label for="leave_type" class="form-label">Leave Type</label>
+                    <select class="form-select" id="leave_type" required>
+                        <option value="" disabled selected>Select Leave Type</option>
+                        <option value="Sick Leave">Sick Leave</option>
+                        <option value="Casual Leave">Casual Leave</option>
+                        <option value="Paid Leave">Paid Leave</option>
+                        <option value="Maternity Leave">Maternity Leave</option>
+                        <option value="Flexible Leave">Flexible Leave</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="starting_date" class="form-label">Starting Date</label>
+                    <input type="date" class="form-control" id="starting_date" required>
+                </div>
+                <div class="mb-3">
+                    <label for="ending_date" class="form-label">Ending Date</label>
+                    <input type="date" class="form-control" id="ending_date" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Submit Leave Request</button>
+            </form>
+            <p id="responseMessage" class="mt-3"></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("leaveForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            
+            const leaveData = {
+                user_id: document.getElementById("user_id").value,
+                full_name: document.getElementById("full_name").value,
+                department: document.getElementById("department").value,
+                leave_type: document.getElementById("leave_type").value,
+                starting_date: document.getElementById("starting_date").value,
+                ending_date: document.getElementById("ending_date").value
+            };
+
+            const response = await fetch("http://localhost:3000/submit-leave", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(leaveData)
+            });
+
+            const result = await response.json();
+            document.getElementById("responseMessage").textContent = result.message;
+            document.getElementById("responseMessage").style.color = result.success ? "green" : "red";
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

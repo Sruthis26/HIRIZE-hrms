@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruit Display</title>
+    <script defer src="script.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Recruit Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Job Position</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>CV</th>
+                <th>Resume</th>
+            </tr>
+        </thead>
+        <tbody id="recruitTableBody">
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+       async function fetchRecruitData() {
+    try {
+        const response = await fetch('http://localhost:4000/recruit');
+        console.log("Fetching data... Response:", response);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Fetched Data:", data);  // Debugging line
+
+        const tableBody = document.getElementById('recruitTableBody');
+        tableBody.innerHTML = ''; 
+
+        if (data.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="6">No job applications found</td></tr>';
+            return;
+        }
+
+        data.forEach((applicant) => {
+            const row = `
+                <tr>
+                    <td>${applicant.job_position}</td>
+                    <td>${applicant.full_name}</td>
+                    <td>${applicant.email}</td>
+                    <td>${applicant.phone}</td>
+                    <td><a href="/uploads/${applicant.cv}" target="_blank">Download CV</a></td>
+                    <td><a href="/uploads/${applicant.resume}" target="_blank">Download Resume</a></td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+    } catch (error) {
+        console.error('Error fetching recruit data:', error);
+        document.getElementById('recruitTableBody').innerHTML =
+            '<tr><td colspan="6">Error loading data. Please check console.</td></tr>';
+    }
+}
+
+
+        // Call function on page load
+        fetchRecruitData();
+    </script>
+
+</body>
+</html>

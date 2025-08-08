@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Attendance</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome (Icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 30px;
+        }
+        .table th {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+        }
+        .table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+        .attendance-dropdown {
+            width: 100%;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .btn-save {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        .btn-save:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 class="text-center mb-4">Employee Attendance</h2>
+        
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Full Name</th>
+                        <th>Department</th>
+                        <th>Attendance Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceTable">
+                    <!-- Employee data will be inserted here dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center mt-3">
+            <button class="btn btn-save" onclick="submitAllAttendance()">
+                <i class="fas fa-save"></i> Save All
+            </button>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            fetchEmployees();
+        });
+
+        function fetchEmployees() {
+            $.get("/employees", function (data) {
+                let tableContent = "";
+                data.forEach(emp => {
+                    tableContent += `
+                        <tr>
+                            <td>${emp.user_id}</td>
+                            <td>${emp.full_name}</td>
+                            <td>${emp.department}</td>
+                            <td>
+                                <select class="attendance-dropdown form-select" data-user-id="${emp.user_id}">
+                                    <option value="Present">Present</option>
+                                    <option value="Absent">Absent</option>
+                                    <option value="Half-Day">Half-Day</option>
+                                </select>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" onclick="submitAttendanceForUser('${emp.user_id}', '${emp.full_name}', '${emp.department}')">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                $("#attendanceTable").html(tableContent);
+            });
+        }
+
+        function submitAttendanceForUser(userId, fullName, department) {
+            let attendanceStatus = $(`.attendance-dropdown[data-user-id='${userId}']`).val();
+
+            let attendanceData = {
+                user_id: userId,
+                full_name: fullName,
+                department: department,
+                attendance_status: attendanceStatus
+            };
+
+            $.post("/submit-attendance", attendanceData, function (response) {
+                alert(response.message);
+            }).fail(function () {
+                alert("Error submitting attendance.");
+            });
+        }
+
+        function submitAllAttendance() {
+            let attendanceData = [];
+
+            $(".attendance-dropdown").each(function () {
+                let userId = $(this).data("user-id");
+                let fullName = $(`td:contains(${userId})`).next().text();
+                let department = $(`td:contains(${userId})`).next().next().text();
+                let attendanceStatus = $(this).val();
+
+                attendanceData.push({
+                    user_id: userId,
+                    full_name: fullName,
+                    department: department,
+                    attendance_status: attendanceStatus
+                });
+            });
+
+            $.post("/submit-attendance-bulk", { data: attendanceData }, function (response) {
+                alert(response.message);
+            }).fail(function () {
+                alert("Error submitting attendance.");
+            });
+        }
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

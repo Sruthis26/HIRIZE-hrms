@@ -1,0 +1,42 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  DOCKER_IMAGE: registry.gitlab.com/miniproject5714903/hirize-hrm
+  DOCKER_TLS_CERTDIR: ""
+
+before_script:
+  - echo "🚀 Running pipeline for HIRIZE HRM"
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - echo "🔧 Logging into Docker Registry"
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - echo "🐳 Building Docker image"
+    - docker build -t $DOCKER_IMAGE .
+    - echo "📤 Pushing Docker image"
+    - docker push $DOCKER_IMAGE
+
+test:
+  stage: test
+  image: node:18
+  script:
+    - echo "📦 Installing dependencies"
+    - npm install
+    - echo "🧪 Running tests"
+    - npm test
+
+deploy:
+  stage: deploy
+  image: curlimages/curl:latest
+  script:
+    - echo "🚀 Triggering Render Deployment"
+    - curl -X POST "https://api.render.com/deploy/srv-cvrbi6uuk2gs73fbcpag?key=bO_4KJMBUFA"
+  only:
+    - main

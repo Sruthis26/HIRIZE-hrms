@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Requests</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .table-container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .table th, .table td {
+            font-size: 14px;
+            padding: 8px;
+            text-align: center;
+        }
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-4 table-container">
+        <h3 class="text-center mb-3">Leave Requests</h3>
+        <table class="table table-bordered bg-white shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Dept</th>
+                    <th>Type</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="leaveTableBody">
+                <!-- Data will be inserted dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Fetch leave requests and populate table
+        function fetchLeaveRequests() {
+            fetch('/get-leaves')
+            .then(response => response.json())
+            .then(leaves => {
+                const tbody = document.getElementById('leaveTableBody');
+                tbody.innerHTML = ''; // Clear old data
+
+                if (leaves.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">No leave requests found</td></tr>`;
+                    return;
+                }
+
+                leaves.forEach(leave => {
+                    const statusClass = leave.status === 'Accepted' ? 'text-success' : 
+                                        leave.status === 'Rejected' ? 'text-danger' : 'text-warning';
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${leave.user_id}</td>
+                            <td>${leave.f_name}</td>
+                            <td>${leave.department}</td>
+                            <td>${leave.leave_type}</td>
+                            <td>${leave.starting_date}</td>
+                            <td>${leave.ending_date}</td>
+                            <td id="status-${leave.id}" class="fw-bold ${statusClass}">
+                                ${leave.status || 'Pending'}
+                            </td>
+                            <td>
+                                <button onclick="updateLeaveStatus(${leave.id}, 'Accepted')" class="btn btn-success btn-sm">✓</button>
+                                <button onclick="updateLeaveStatus(${leave.id}, 'Rejected')" class="btn btn-danger btn-sm">✗</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            })
+            .catch(error => console.error('Error fetching leaves:', error));
+        }
+
+        // Update leave status
+        function updateLeaveStatus(leaveId, newStatus) {
+            fetch('/update-leave-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ leave_id: leaveId, status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Status updated successfully');
+                    fetchLeaveRequests(); // Refresh table
+                } else {
+                    alert('Error updating status');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Load leave requests on page load
+        window.onload = fetchLeaveRequests;
+    </script>
+</body>
+</html>
